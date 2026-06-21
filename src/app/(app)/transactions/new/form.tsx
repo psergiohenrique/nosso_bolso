@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CategorySelect } from "@/components/category-select";
 import { cn } from "@/lib/utils";
 import type { Category, TxType } from "@/lib/types";
 
@@ -87,20 +88,9 @@ export function TransactionForm({
         />
       </div>
 
-      {/* categoria (não em transferência) */}
+      {/* categoria + subcategoria (não em transferência) */}
       {type !== "transfer" && (
-        <div className="space-y-2">
-          <Label htmlFor="categoryId">Categoria</Label>
-          <select id="categoryId" name="categoryId" className={selectClass}>
-            <option value="">Sem categoria</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.parent_id ? "— " : ""}
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategorySelect key={type} categories={categories} />
       )}
 
       {/* conta (origem) */}

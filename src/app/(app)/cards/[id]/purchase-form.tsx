@@ -6,6 +6,7 @@ import { createCardPurchase, type CardState } from "@/lib/actions/cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CategorySelect } from "@/components/category-select";
 import { formatCents } from "@/lib/money";
 import { toCents } from "@/lib/money";
 import type { Category } from "@/lib/types";
@@ -89,18 +90,7 @@ export function PurchaseForm({
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="categoryId">Categoria</Label>
-        <select id="categoryId" name="categoryId" className={selectClass}>
-          <option value="">Sem categoria</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.parent_id ? "— " : ""}
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySelect categories={categories} />
 
       {members.length > 0 && (
         <div className="space-y-2">

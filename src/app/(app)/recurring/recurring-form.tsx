@@ -6,6 +6,7 @@ import { createRecurring, type RecurringState } from "@/lib/actions/recurring";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CategorySelect } from "@/components/category-select";
 import type { Category } from "@/lib/types";
 
 type Opt = { id: string; name: string };
@@ -79,18 +80,7 @@ export function RecurringForm({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="categoryId">Categoria</Label>
-        <select id="categoryId" name="categoryId" className={selectClass}>
-          <option value="">Sem categoria</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.parent_id ? "— " : ""}
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySelect key={type} categories={categories} />
 
       <div className="space-y-2">
         <Label htmlFor="accountId">Conta (opcional)</Label>
