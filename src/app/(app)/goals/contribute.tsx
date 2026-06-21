@@ -5,11 +5,11 @@ import { toast } from "sonner";
 import { addContribution, deleteGoal } from "@/lib/actions/goals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function Contribute({ id }: { id: string }) {
   const [amount, setAmount] = useState("");
   const [pending, start] = useTransition();
-  const [removing, startRemove] = useTransition();
 
   return (
     <div className="flex items-center gap-2">
@@ -33,19 +33,20 @@ export function Contribute({ id }: { id: string }) {
       >
         {pending ? "..." : "Aportar"}
       </Button>
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={removing}
-        onClick={() =>
-          startRemove(async () => {
-            await deleteGoal(id);
-            toast.success("Meta removida");
-          })
+      <ConfirmDialog
+        title="Excluir meta?"
+        description="Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        onConfirm={async () => {
+          await deleteGoal(id);
+          toast.success("Meta removida");
+        }}
+        trigger={
+          <Button size="sm" variant="outline">
+            Excluir
+          </Button>
         }
-      >
-        Excluir
-      </Button>
+      />
     </div>
   );
 }

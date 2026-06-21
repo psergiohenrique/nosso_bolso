@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
   createAccount,
@@ -10,6 +10,7 @@ import {
 import { accountTypeLabels } from "@/lib/validators/account";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatCents } from "@/lib/money";
 
 type Acc = { id: string; name: string; balance: number };
@@ -20,7 +21,6 @@ const selectClass =
 
 export function AccountsCard({ accounts }: { accounts: Acc[] }) {
   const [state, action, pending] = useActionState(createAccount, initial);
-  const [archiving, startArchive] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -44,19 +44,23 @@ export function AccountsCard({ accounts }: { accounts: Acc[] }) {
                 <span className="tabular-nums text-muted-foreground">
                   {formatCents(a.balance)}
                 </span>
-                <button
-                  type="button"
-                  className="text-xs text-muted-foreground hover:text-red-600 disabled:opacity-40"
-                  disabled={archiving}
-                  onClick={() =>
-                    startArchive(async () => {
-                      await archiveAccount(a.id);
-                      toast.success("Conta arquivada");
-                    })
+                <ConfirmDialog
+                  title="Arquivar conta?"
+                  description={`A conta "${a.name}" deixa de aparecer nos lançamentos.`}
+                  confirmLabel="Arquivar"
+                  onConfirm={async () => {
+                    await archiveAccount(a.id);
+                    toast.success("Conta arquivada");
+                  }}
+                  trigger={
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-red-600 disabled:opacity-40"
+                    >
+                      arquivar
+                    </button>
                   }
-                >
-                  arquivar
-                </button>
+                />
               </span>
             </li>
           ))}
