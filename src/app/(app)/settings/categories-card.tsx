@@ -41,58 +41,80 @@ export function CategoriesCard({ categories }: { categories: Cat[] }) {
   // Pais possíveis: categorias raiz do mesmo tipo.
   const parents = categories.filter((c) => !c.parent_id && c.kind === kind);
 
-  // Ordena raiz seguida de suas subcategorias para exibição.
-  const ordered = categories
-    .filter((c) => !c.parent_id)
-    .flatMap((root) => [
-      root,
-      ...categories.filter((c) => c.parent_id === root.id),
-    ]);
+  const childrenOf = (parentId: string) =>
+    categories.filter((c) => c.parent_id === parentId);
+
+  const delButton = (c: Cat) => (
+    <ConfirmDialog
+      title="Excluir categoria?"
+      description={
+        c.parent_id
+          ? `A subcategoria "${c.name}" será excluída.`
+          : `A categoria "${c.name}" e suas subcategorias serão excluídas. Lançamentos ligados ficam sem categoria.`
+      }
+      confirmLabel="Excluir"
+      onConfirm={async () => {
+        await deleteCategory(c.id);
+        toast.success("Categoria excluída");
+      }}
+      trigger={
+        <button
+          type="button"
+          className="text-xs text-muted-foreground hover:text-red-600 disabled:opacity-40"
+        >
+          excluir
+        </button>
+      }
+    />
+  );
+
+  const kinds: ("expense" | "income")[] = ["expense", "income"];
 
   return (
-    <div className="space-y-4">
-      {ordered.length > 0 && (
-        <ul className="space-y-1">
-          {ordered.map((c) => (
-            <li
-              key={c.id}
-              className="flex items-center justify-between gap-2 text-sm"
-            >
-              <span className="flex items-center gap-2">
-                {c.parent_id && (
-                  <span className="text-muted-foreground">—</span>
-                )}
-                {c.icon && <span>{c.icon}</span>}
-                <span>{c.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {categoryKindLabels[c.kind]}
-                </span>
-              </span>
-              <ConfirmDialog
-                title="Excluir categoria?"
-                description={
-                  c.parent_id
-                    ? `A subcategoria "${c.name}" será excluída.`
-                    : `A categoria "${c.name}" e suas subcategorias serão excluídas. Lançamentos ligados ficam sem categoria.`
-                }
-                confirmLabel="Excluir"
-                onConfirm={async () => {
-                  await deleteCategory(c.id);
-                  toast.success("Categoria excluída");
-                }}
-                trigger={
-                  <button
-                    type="button"
-                    className="text-xs text-muted-foreground hover:text-red-600 disabled:opacity-40"
-                  >
-                    excluir
-                  </button>
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="space-y-6">
+      {kinds.map((k) => {
+        const roots = categories.filter((c) => !c.parent_id && c.kind === k);
+        if (roots.length === 0) return null;
+        return (
+          <div key={k} className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {categoryKindLabels[k]}
+            </h3>
+            <ul className="space-y-3">
+              {roots.map((root) => {
+                const subs = childrenOf(root.id);
+                return (
+                  <li key={root.id} className="space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-sm font-medium">
+                      <span className="flex items-center gap-2">
+                        {root.icon && <span>{root.icon}</span>}
+                        <span>{root.name}</span>
+                      </span>
+                      {delButton(root)}
+                    </div>
+                    {subs.length > 0 && (
+                      <ul className="ml-3 border-l pl-3">
+                        {subs.map((sub) => (
+                          <li
+                            key={sub.id}
+                            className="flex items-center justify-between gap-2 py-0.5 text-sm text-muted-foreground"
+                          >
+                            <span className="flex items-center gap-2">
+                              {sub.icon && <span>{sub.icon}</span>}
+                              <span>{sub.name}</span>
+                            </span>
+                            {delButton(sub)}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
 
       <form ref={formRef} action={action} className="space-y-2">
         <div className="flex gap-2">
